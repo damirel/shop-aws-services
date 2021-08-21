@@ -1,0 +1,16 @@
+[
+  {
+    "count": 10,
+    "description": "Skin-softening pre-treatment exfoliates and smooths to diminish the look of crepey skin",
+    "id": "7567ec4b-b10c-48c5-9345-fc73c48a80aa",
+    "price": 15.95,
+    "title": "Crepey Skin Pre-Treatment Exfoliating Scrub"
+  },
+  {
+    "count": 20,
+    "description": "Enriched with skin-firming Copper Peptides and anti-aging Resveratrol, our silky, concentrated serum protects against collagen degradation as it nourishes and moisturizes the skin",
+    "id": "7567ec4b-b10c-48c5-9345-fc73c48a80a0",
+    "price": 19.99,
+    "title": "Skin-softening pre-treatment exfoliates and smooths to diminish the look of crepey skin"
+  }
+]
