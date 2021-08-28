@@ -22,6 +22,12 @@ const getProductsById: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async
 };
 
 function getProduct(productId: string) {
+  if (!productId) {
+    return formatJSONResponse({
+      statusCode: 400,
+      message: 'Missing productId param',
+    });
+  }
   let productResult;
   productList.forEach((element) => {
     if (element.id == productId) {

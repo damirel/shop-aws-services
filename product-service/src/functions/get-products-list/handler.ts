@@ -13,7 +13,10 @@ const getProductsList: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async
     body: JSON.stringify(
         productList
     ),
+    headers: {
+      'Access-Control-Allow-Origin': '*'
+    }
   };
-}
+};
 
 export const main = middyfy(getProductsList);
