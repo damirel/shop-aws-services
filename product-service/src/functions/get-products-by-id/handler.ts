@@ -12,10 +12,9 @@ const getProductsById: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async
   try {
     const productId: string = event.pathParameters.productId;
     let productResult = getProduct(productId);
-    return formatJSONResponse(productResult);
+    return formatJSONResponse(200, productResult);
   } catch (err) {
-    return formatJSONResponse({
-      statusCode: 404,
+    return formatJSONResponse(404, {
       message: err.message,
     });
   }
@@ -23,8 +22,7 @@ const getProductsById: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async
 
 function getProduct(productId: string) {
   if (!productId) {
-    return formatJSONResponse({
-      statusCode: 400,
+    return formatJSONResponse(400, {
       message: 'Missing productId param',
     });
   }
