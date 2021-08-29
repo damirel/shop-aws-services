@@ -1,33 +1,13 @@
 import 'source-map-support/register';
+import {formatJSONResponse} from '@libs/apiGateway';
+import {middyfy} from '@libs/lambda';
+import productsListJson from '../../../productList.json';
+import type {ValidatedEventAPIGatewayProxyEvent} from '@libs/apiGateway';
 
-import type { ValidatedEventAPIGatewayProxyEvent } from '@libs/apiGateway';
-import { formatJSONResponse } from '@libs/apiGateway';
-import { middyfy } from '@libs/lambda';
-import productList from '../../../productList.json';
-
-
-import schema from './schema';
-
-const getProductsById: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (event) => {
-  try {
-    const productId: string = event.pathParameters.productId;
-    let productResult = getProduct(productId);
-    return formatJSONResponse(200, productResult);
-  } catch (err) {
-    return formatJSONResponse(404, {
-      message: err.message,
-    });
-  }
-};
-
-function getProduct(productId: string) {
-  if (!productId) {
-    return formatJSONResponse(400, {
-      message: 'Missing productId param',
-    });
-  }
+export const findProduct = async (productId: string, productsListJson) => {
+  const productsList = await Promise.resolve(productsListJson);
   let productResult;
-  productList.forEach((element) => {
+  productsList.forEach((element) => {
     if (element.id == productId) {
       productResult = element;
     }
@@ -36,6 +16,18 @@ function getProduct(productId: string) {
     throw new Error('Product not found! Product id:' + productId);
   }
   return productResult;
-}
+};
+
+const getProductsById: ValidatedEventAPIGatewayProxyEvent<typeof Object> = async (event) => {
+  try {
+    const productId: string = event.pathParameters.productId;
+    let productResult = await findProduct(productId, productsListJson);
+    return formatJSONResponse(200, productResult);
+  } catch (err) {
+    return formatJSONResponse(404, {
+      message: err.message,
+    });
+  }
+};
 
 export const main = middyfy(getProductsById);
