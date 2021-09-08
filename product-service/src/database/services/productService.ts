@@ -1,5 +1,6 @@
 import {Client} from 'pg';
 import Product from '../../models/Product';
+import ProductRequest from '../../models/ProductRequest';
 import {dbOptions} from '../config';
 
 export const getAllProducts = async (): Promise<Product[]> => {
@@ -34,6 +35,28 @@ export const getProduct = async (id: string): Promise<Product[]> => {
     return result;
   } catch (error) {
     throw new Error('Failed to get product from database + ' + error);
+  } finally {
+    client.end();
+  }
+};
+
+export const createProduct = async (productRequest: ProductRequest): Promise<string> => {
+  const client = new Client(dbOptions);
+  const {title, description, price, count} = productRequest;
+  const queryProduct = 'INSERT INTO products(title, description, price) VALUES($1, $2, $3) RETURNING id';
+  const valuesProduct = [title, description, price];
+  const queryStock = 'INSERT INTO stocks(product_id, count) VALUES($1, $2)';
+
+  try {
+    await client.connect();
+    const {rows: products} = await client.query(queryProduct, valuesProduct);
+    const productId = products[0].id;
+    const countStock = [productId, count];
+    await client.query(queryStock, countStock);
+    console.log("Product created:" + productId);
+    return productId;
+  } catch (error) {
+    throw new Error('Failed to create product in database + ' + error);
   } finally {
     client.end();
   }
