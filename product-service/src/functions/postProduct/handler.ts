@@ -22,8 +22,9 @@ export const postProduct: ValidatedEventAPIGatewayProxyEvent<typeof schema> = as
       message: 'Unsupported media type. Please use Content-Type:application/json'
     });
   }
-  const productRequest = getProductFromRequest(event);
+
   try {
+    const productRequest = getProductFromRequest(event);
     const productResult = await createProduct(productRequest);
     return formatJSONResponse(200, {productId: productResult});
   } catch (err) {

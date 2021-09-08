@@ -49,13 +49,16 @@ export const createProduct = async (productRequest: ProductRequest): Promise<str
 
   try {
     await client.connect();
+    await client.query('BEGIN');
     const {rows: products} = await client.query(queryProduct, valuesProduct);
     const productId = products[0].id;
     const countStock = [productId, count];
     await client.query(queryStock, countStock);
     console.log("Product created:" + productId);
+    await client.query('COMMIT');
     return productId;
   } catch (error) {
+    await client.query('ROLLBACK');
     throw new Error('Failed to create product in database + ' + error);
   } finally {
     client.end();
