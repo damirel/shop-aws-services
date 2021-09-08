@@ -27,7 +27,7 @@ export const postProduct: ValidatedEventAPIGatewayProxyEvent<typeof schema> = as
     const productResult = await createProduct(productRequest);
     return formatJSONResponse(200, {productId: productResult});
   } catch (err) {
-    return formatJSONResponse(400, {
+    return formatJSONResponse(500, {
       message: err.message,
     });
   }

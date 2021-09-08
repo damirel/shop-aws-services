@@ -7,9 +7,14 @@ export const getProductsById = async (event) => {
   try {
     const productId: string = event.pathParameters.productId;
     let productResult = await getProduct(productId);
-    return formatJSONResponse(200, {product: productResult});
+    if (!productResult.length) {
+      return formatJSONResponse(404, {
+        message: 'Product not found. ProductId:' + productId
+      });
+    }
+    return formatJSONResponse(200, {product: productResult[0]});
   } catch (err) {
-    return formatJSONResponse(404, {
+    return formatJSONResponse(500, {
       message: err.message,
     });
   }
