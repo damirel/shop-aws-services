@@ -4,8 +4,9 @@ import {middyfy} from '@libs/lambda';
 import {getProduct} from '../../database/services/productService';
 
 export const getProductsById = async (event) => {
+  const productId: string = event.pathParameters.productId;
+  console.info('Get product request. Event parameters:' + JSON.stringify(event.pathParameters));
   try {
-    const productId: string = event.pathParameters.productId;
     let productResult = await getProduct(productId);
     if (!productResult.length) {
       return formatJSONResponse(404, {

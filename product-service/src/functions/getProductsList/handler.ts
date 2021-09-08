@@ -4,6 +4,7 @@ import {middyfy} from '@libs/lambda';
 import {getAllProducts} from '../../database/services/productService';
 
 export const getProductsList = async () => {
+  console.log('Get all products request');
   try {
     const result = await getAllProducts();
     return formatJSONResponse(200, {products: result});
