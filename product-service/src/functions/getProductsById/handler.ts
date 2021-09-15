@@ -1,29 +1,21 @@
 import 'source-map-support/register';
 import {formatJSONResponse} from '@libs/apiGateway';
 import {middyfy} from '@libs/lambda';
-import productsListJson from '../../../productList.json';
-
-export const findProduct = async (productId: string, productsListJson) => {
-  const productsList = await Promise.resolve(productsListJson);
-  let productResult;
-  productsList.forEach((element) => {
-    if (element.id == productId) {
-      productResult = element;
-    }
-  });
-  if (productResult == null) {
-    throw new Error('Product not found. Product id:' + productId);
-  }
-  return productResult;
-};
+import {getProduct} from '../../database/services/productService';
 
 export const getProductsById = async (event) => {
+  const productId: string = event.pathParameters.productId;
+  console.info('Get product request. Event parameters:' + JSON.stringify(event.pathParameters));
   try {
-    const productId: string = event.pathParameters.productId;
-    let productResult = await findProduct(productId, productsListJson);
-    return formatJSONResponse(200, productResult);
+    let productResult = await getProduct(productId);
+    if (!productResult.length) {
+      return formatJSONResponse(404, {
+        message: 'Product not found. ProductId:' + productId
+      });
+    }
+    return formatJSONResponse(200, {product: productResult[0]});
   } catch (err) {
-    return formatJSONResponse(404, {
+    return formatJSONResponse(500, {
       message: err.message,
     });
   }
