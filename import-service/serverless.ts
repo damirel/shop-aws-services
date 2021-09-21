@@ -1,6 +1,7 @@
 import type { AWS } from '@serverless/typescript';
 
 import importProductsFile from '@functions/importProductsFile';
+import importFileParser from '@functions/importFileParser';
 
 const serverlessConfiguration: AWS = {
   service: 'import-service',
@@ -17,6 +18,26 @@ const serverlessConfiguration: AWS = {
     runtime: 'nodejs14.x',
     region: 'eu-west-1',
     stage: 'dev',
+    iam: {
+      role: {
+        statements: [
+          {
+            Effect: 'Allow',
+            Action: [
+              's3:ListBucket'
+            ],
+            Resource: 'arn:aws:s3:::dmf-task5'
+          },
+          {
+            Effect: 'Allow',
+            Action: [
+              's3:GetObject'
+            ],
+            Resource: 'arn:aws:s3:::dmf-task5/*'
+          }
+        ]
+      }
+    },
     apiGateway: {
       minimumCompressionSize: 1024,
       shouldStartNameWithService: true,
@@ -27,7 +48,7 @@ const serverlessConfiguration: AWS = {
     lambdaHashingVersion: '20201221',
   },
   // import the function via paths
-  functions: { importProductsFile },
+  functions: { importProductsFile, importFileParser },
 };
 
 module.exports = serverlessConfiguration;
