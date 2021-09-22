@@ -1,11 +1,8 @@
 import 'source-map-support/register';
 
-import type { ValidatedEventAPIGatewayProxyEvent } from '@libs/apiGateway';
 import { formatJSONResponse } from '@libs/apiGateway';
 import { middyfy } from '@libs/lambda';
 import * as AWS from 'aws-sdk'
-
-import schema from './schema';
 
 export const getSignedUrl = async (event) => {
   const s3 = new AWS.S3({
@@ -25,7 +22,7 @@ export const getSignedUrl = async (event) => {
   return uploadUrl;
 };
 
-const importProductsFile: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (event) => {
+export const importProductsFile = async (event) => {
   try {
     const uploadUrl = await getSignedUrl(event);
     return formatJSONResponse(200, {url: uploadUrl});

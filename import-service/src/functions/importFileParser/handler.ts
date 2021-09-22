@@ -3,7 +3,7 @@ import 'source-map-support/register';
 import {middyfy} from '@libs/lambda';
 import {formatJSONResponse} from '@libs/apiGateway';
 import * as AWS from 'aws-sdk'
-import * as csv from 'csv-parser'
+import csv from 'csv-parser';
 
 const BUCKET = 'dmf-task5';
 const UPLOADED_FOLDER = 'uploaded';
