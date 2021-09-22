@@ -7,7 +7,7 @@ import * as AWS from 'aws-sdk'
 
 import schema from './schema';
 
-const importProductsFile: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (event) => {
+export const getSignedUrl = async (event) => {
   const s3 = new AWS.S3({
     region: 'eu-west-1'
   });
@@ -20,8 +20,19 @@ const importProductsFile: ValidatedEventAPIGatewayProxyEvent<typeof schema> = as
     ContentType: 'text/csv'
   };
 
-  const uploadUrl: string = await s3.getSignedUrl('putObject', params);
-  return formatJSONResponse(200, {url: uploadUrl});
+  const uploadUrl: string = await s3.getSignedUrlPromise('putObject', params);
+  console.debug(`Signed url: ${uploadUrl}`);
+  return uploadUrl;
+};
+
+const importProductsFile: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (event) => {
+  try {
+    const uploadUrl = await getSignedUrl(event);
+    return formatJSONResponse(200, {url: uploadUrl});
+  } catch (e) {
+    console.error('Failed to process event', e);
+    return formatJSONResponse(500, {message: 'Failed to process event'});
+  }
 };
 
 export const main = middyfy(importProductsFile);

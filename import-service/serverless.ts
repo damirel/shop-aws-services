@@ -31,7 +31,7 @@ const serverlessConfiguration: AWS = {
           {
             Effect: 'Allow',
             Action: [
-              's3:GetObject'
+              's3:GetObject', 's3:CopyObject', 's3:DeleteObject'
             ],
             Resource: 'arn:aws:s3:::dmf-task5/*'
           }
