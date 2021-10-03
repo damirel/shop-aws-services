@@ -9,6 +9,20 @@ const BUCKET = 'dmf-task5';
 const UPLOADED_FOLDER = 'uploaded';
 const PARSED_FOLDER = 'parsed';
 
+function sendToSqs(dataJson) {
+  const sqs = new AWS.SQS();
+  const sqsUrl = process.env.SQS_URL;
+  sqs.sendMessage({
+    QueueUrl: sqsUrl,
+    MessageBody: dataJson
+  }, (err) => {
+    console.debug(`Sending message to SQS. Message:[${dataJson}], URL:${sqsUrl}`);
+    if (err !== null) {
+      console.error(err)
+    }
+  });
+}
+
 export const processRecords = (event) => {
   const s3 = new AWS.S3({
     region: 'eu-west-1'
@@ -26,7 +40,9 @@ export const processRecords = (event) => {
 
     s3Stream.pipe(csv())
     .on('data', (data) => {
-      console.log(JSON.stringify(data))
+      const dataJson = JSON.stringify(data);
+      console.log(dataJson);
+      sendToSqs(dataJson);
     })
     .on('error', error => {
       throw new Error(`Failed to parse the file: ${error}`);

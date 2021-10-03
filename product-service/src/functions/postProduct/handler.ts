@@ -4,16 +4,8 @@ import {middyfy} from '@libs/lambda';
 import {createProduct} from '../../database/services/productService';
 import type {ValidatedEventAPIGatewayProxyEvent} from '@libs/apiGateway';
 import schema from './schema';
+import { getProductFromRequest } from "@libs/utils";
 
-export const getProductFromRequest = (event) => {
-  const {title, description, price, count} = event.body;
-  return {
-    title: title,
-    description: description,
-    price: price,
-    count: count
-  };
-};
 
 export const postProduct: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (event) => {
   console.log("Post product request:" + JSON.stringify(event.body));
@@ -24,7 +16,7 @@ export const postProduct: ValidatedEventAPIGatewayProxyEvent<typeof schema> = as
   }
 
   try {
-    const productRequest = getProductFromRequest(event);
+    const productRequest = getProductFromRequest(event.body);
     const productResult = await createProduct(productRequest);
     return formatJSONResponse(200, {productId: productResult});
   } catch (err) {

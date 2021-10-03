@@ -2,7 +2,7 @@ import type { AWS } from '@serverless/typescript';
 
 import importProductsFile from '@functions/importProductsFile';
 import importFileParser from '@functions/importFileParser';
-import catalogBatchProcess from '@functions/catalogBatchProcess';
+
 
 const serverlessConfiguration: AWS = {
   service: 'import-service',
@@ -35,6 +35,13 @@ const serverlessConfiguration: AWS = {
               's3:GetObject', 's3:CopyObject', 's3:DeleteObject'
             ],
             Resource: 'arn:aws:s3:::dmf-task5/*'
+          },
+          {
+            Effect: 'Allow',
+            Action: [
+              'sqs:*'
+            ],
+            Resource: '${cf:product-service-dev.SqsArn}'
           }
         ]
       }
@@ -45,11 +52,12 @@ const serverlessConfiguration: AWS = {
     },
     environment: {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
+      SQS_URL: '${cf:product-service-dev.SqsUrl}'
     },
     lambdaHashingVersion: '20201221',
   },
   // import the function via paths
-  functions: { importProductsFile, importFileParser, catalogBatchProcess },
+  functions: { importProductsFile, importFileParser },
 };
 
 module.exports = serverlessConfiguration;
