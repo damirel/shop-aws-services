@@ -11,6 +11,16 @@ function publishToSns(productRequest) {
   sns.publish({
     Subject: 'Product created',
     Message: JSON.stringify(productRequest),
+    MessageAttributes: {
+      price: {
+        DataType: 'Number',
+        StringValue: productRequest['price']
+      },
+      count: {
+        DataType: 'Number',
+        StringValue: productRequest['count']
+      }
+    },
     TopicArn: process.env.SNS_TOPIC_ARN
   }, (err) => {
     console.log('Email notification sent, for created product:', JSON.stringify(productRequest));

@@ -76,6 +76,20 @@ const serverlessConfiguration: AWS = {
           Endpoint: '${env:SNS_EMAIL}',
           Protocol: 'email',
           TopicArn: { 'Ref': 'createProductTopic' },
+          FilterPolicy: {
+            'price': [{"numeric": [">=", 100]}]
+          }
+        }
+      },
+      snsSubscriptionQuantityManager: {
+        Type: 'AWS::SNS::Subscription',
+        Properties: {
+          Endpoint: '${env:SNS_EMAIL_MANAGER}',
+          Protocol: 'email',
+          TopicArn: { 'Ref': 'createProductTopic' },
+          FilterPolicy: {
+            'count': [{"numeric": ["<=", 10]}]
+          }
         }
       }
     },
