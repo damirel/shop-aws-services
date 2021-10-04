@@ -52,6 +52,7 @@ const serverlessConfiguration: AWS = {
       PG_DATABASE: '${env:PG_DATABASE}',
       PG_USERNAME: '${env:PG_USERNAME}',
       PG_PASSWORD: '${env:PG_PASSWORD}',
+      SNS_TOPIC_ARN: { 'Ref': 'createProductTopic' }
     },
     lambdaHashingVersion: '20201221',
   },
