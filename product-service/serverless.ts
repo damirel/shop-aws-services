@@ -30,6 +30,13 @@ const serverlessConfiguration: AWS = {
               'sqs:*'
             ],
             Resource: { 'Fn::GetAtt': ['catalogItemsQueue', 'Arn'] }
+          },
+          {
+            Effect: 'Allow',
+            Action: [
+              'sns:*'
+            ],
+            Resource: { 'Ref': 'createProductTopic' }
           }
         ]
       }
@@ -54,6 +61,20 @@ const serverlessConfiguration: AWS = {
         Type: 'AWS::SQS::Queue',
         Properties: {
           QueueName: 'catalogItemsQueue',
+        }
+      },
+      createProductTopic: {
+        Type: 'AWS::SNS::Topic',
+        Properties: {
+          TopicName: 'createProductTopic',
+        }
+      },
+      snsSubscription: {
+        Type: 'AWS::SNS::Subscription',
+        Properties: {
+          Endpoint: '${env:SNS_EMAIL}',
+          Protocol: 'email',
+          TopicArn: { 'Ref': 'createProductTopic' },
         }
       }
     },
