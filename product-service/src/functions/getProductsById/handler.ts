@@ -1,13 +1,13 @@
 import 'source-map-support/register';
 import {formatJSONResponse} from '@libs/apiGateway';
 import {middyfy} from '@libs/lambda';
-import {getProduct} from '../../database/services/productService';
+import { ProductService } from '../../database/services/productService';
 
 export const getProductsById = async (event) => {
   const productId: string = event.pathParameters.productId;
   console.info('Get product request. Event parameters:' + JSON.stringify(event.pathParameters));
   try {
-    let productResult = await getProduct(productId);
+    let productResult = await new ProductService().getProduct(productId);
     if (!productResult.length) {
       return formatJSONResponse(404, {
         message: 'Product not found. ProductId:' + productId

@@ -1,9 +1,10 @@
 import 'source-map-support/register';
 
 import { middyfy } from '@libs/lambda';
-import { createProduct } from '../../database/services/productService';
+import { ProductService } from '../../database/services/productService';
 import { getProductFromRequest } from "@libs/utils";
 import * as AWS from 'aws-sdk'
+import { formatJSONResponse } from "@libs/apiGateway";
 
 
 function publishToSns(productRequest) {
@@ -14,11 +15,11 @@ function publishToSns(productRequest) {
     MessageAttributes: {
       price: {
         DataType: 'Number',
-        StringValue: productRequest['price']
+        StringValue: productRequest['price'].toString()
       },
       count: {
         DataType: 'Number',
-        StringValue: productRequest['count']
+        StringValue: productRequest['count'].toString()
       }
     },
     TopicArn: process.env.SNS_TOPIC_ARN
@@ -30,18 +31,23 @@ function publishToSns(productRequest) {
   });
 }
 
-const catalogBatchProcess = async (event) => {
+export const catalogBatchProcess = async (event) => {
   try {
+    let productService = new ProductService();
     for (const record of event.Records) {
       console.log('SQS event received:', record.body);
       const productRequest = getProductFromRequest(JSON.parse(record.body));
       console.debug('Creating product in DB:', productRequest);
-      const productResult = await createProduct(productRequest);
+      const productResult = await productService.createProduct(productRequest);
       console.log('Product created in DB. ProductId:', productResult);
       publishToSns(productRequest);
     }
+    return formatJSONResponse(200, { message: 'SQS even processed successfully' });
   } catch (error) {
     console.log(error);
+    return formatJSONResponse(500, {
+      message: error.message
+    });
   }
 };
 
