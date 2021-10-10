@@ -1,12 +1,12 @@
 import 'source-map-support/register';
 import {formatJSONResponse} from '@libs/apiGateway';
 import {middyfy} from '@libs/lambda';
-import {getAllProducts} from '../../database/services/productService';
+import { ProductService } from '../../database/services/productService';
 
 export const getProductsList = async () => {
   console.log('Get all products request');
   try {
-    const result = await getAllProducts();
+    const result = await new ProductService().getAllProducts();
     return formatJSONResponse(200, {products: result});
   } catch (err) {
     return formatJSONResponse(500, {

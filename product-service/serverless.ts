@@ -3,6 +3,7 @@ import type { AWS } from '@serverless/typescript';
 import getProductsList from '@functions/getProductsList';
 import getProductsById from '@functions/getProductsById';
 import postProduct from '@functions/postProduct';
+import catalogBatchProcess from '@functions/catalogBatchProcess';
 
 const serverlessConfiguration: AWS = {
   service: 'product-service',
@@ -20,6 +21,26 @@ const serverlessConfiguration: AWS = {
     runtime: 'nodejs14.x',
     region: 'eu-west-1',
     stage: 'dev',
+    iam: {
+      role: {
+        statements: [
+          {
+            Effect: 'Allow',
+            Action: [
+              'sqs:*'
+            ],
+            Resource: { 'Fn::GetAtt': ['catalogItemsQueue', 'Arn'] }
+          },
+          {
+            Effect: 'Allow',
+            Action: [
+              'sns:*'
+            ],
+            Resource: { 'Ref': 'createProductTopic' }
+          }
+        ]
+      }
+    },
     apiGateway: {
       minimumCompressionSize: 1024,
       shouldStartNameWithService: true,
@@ -31,11 +52,64 @@ const serverlessConfiguration: AWS = {
       PG_DATABASE: '${env:PG_DATABASE}',
       PG_USERNAME: '${env:PG_USERNAME}',
       PG_PASSWORD: '${env:PG_PASSWORD}',
+      SNS_TOPIC_ARN: { 'Ref': 'createProductTopic' }
     },
     lambdaHashingVersion: '20201221',
   },
+  resources: {
+    Resources: {
+      catalogItemsQueue: {
+        Type: 'AWS::SQS::Queue',
+        Properties: {
+          QueueName: 'catalogItemsQueue',
+        }
+      },
+      createProductTopic: {
+        Type: 'AWS::SNS::Topic',
+        Properties: {
+          TopicName: 'createProductTopic',
+        }
+      },
+      snsSubscription: {
+        Type: 'AWS::SNS::Subscription',
+        Properties: {
+          Endpoint: '${env:SNS_EMAIL}',
+          Protocol: 'email',
+          TopicArn: { 'Ref': 'createProductTopic' },
+          FilterPolicy: {
+            'price': [{"numeric": [">=", 100]}]
+          }
+        }
+      },
+      snsSubscriptionQuantityManager: {
+        Type: 'AWS::SNS::Subscription',
+        Properties: {
+          Endpoint: '${env:SNS_EMAIL_MANAGER}',
+          Protocol: 'email',
+          TopicArn: { 'Ref': 'createProductTopic' },
+          FilterPolicy: {
+            'count': [{"numeric": ["<=", 10]}]
+          }
+        }
+      }
+    },
+    Outputs: {
+      SqsArn: {
+        Value: { 'Fn::GetAtt': ['catalogItemsQueue', 'Arn'] },
+        Export: {
+          Name: 'catalogItemsQueueArn'
+        }
+      },
+      SqsUrl: {
+        Value: { 'Ref': 'catalogItemsQueue' },
+        Export: {
+          Name: 'catalogItemsQueueUrl'
+        }
+      }
+    }
+  },
   // import the function via paths
-  functions: { getProductsList, getProductsById, postProduct },
+  functions: { getProductsList, getProductsById, postProduct, catalogBatchProcess },
 };
 
 module.exports = serverlessConfiguration;
