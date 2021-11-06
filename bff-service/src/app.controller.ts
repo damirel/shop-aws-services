@@ -22,6 +22,11 @@ export class AppController {
     await this.processRequest(request, response, 'products');
   }
 
+  @All('cart')
+  async handleCartRequests(@Req() request: Request, @Res() response: Response): Promise<void> {
+    await this.processRequest(request, response, 'cart');
+  }
+
   async processRequest(request: Request, response: Response, targetService: string): Promise<void> {
     console.log(`Request ${request.method} to ${request.originalUrl}`);
 
@@ -38,27 +43,28 @@ export class AppController {
       console.log(`Service response status code: [${serviceResponse.status}]`);
       response.status(serviceResponse.status).json(serviceResponse.data);
     } catch (e) {
-      this.processResponseError(e);
+      this.processResponseError(e, response);
     }
   }
 
-  private async executeRequest(request: Request, redirectUrl) {
+  private async executeRequest(request: Request, redirectUrl: String) {
     const {body, method, originalUrl} = request;
     const config = {
       method,
       url: `${redirectUrl}${originalUrl}`,
       ...(Object.keys(body).length > 0 && {data: body}),
     } as AxiosRequestConfig;
+    console.log(`Request config: ${JSON.stringify(config)}`);
 
     return await axios(config);
   }
 
-  private processResponseError(e) {
-    if (e.response) {
-      e.response.status(e.response.status).json(e.response.data);
-    } else {
-      e.response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({error: e.message});
-    }
+  private processResponseError(e, response: Response) {
     console.error(`Error response:${e.message}`);
+    if (e.response) {
+      response.status(e.response.status).json(e.response.data);
+    } else {
+      response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({error: e.message});
+    }
   }
 }
