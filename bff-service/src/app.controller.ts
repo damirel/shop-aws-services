@@ -19,13 +19,13 @@ export class AppController {
 
   @All('products')
   async processProductRequests(@Req() request: Request, @Res() response: Response): Promise<void> {
+    let isCachable = request.method === 'GET';
     const cachedResponse = this.appService.getDataFromCache();
-    if (cachedResponse) {
+    if (cachedResponse && isCachable) {
       console.log(`Products response from cache: ${JSON.stringify(cachedResponse)}`);
       response.json(cachedResponse);
       return;
     }
-    let isCachable = request.method === 'GET';
     await this.processRequest(request, response, 'products', isCachable);
   }
 
