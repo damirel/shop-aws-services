@@ -19,15 +19,22 @@ export class AppController {
 
   @All('products')
   async processProductRequests(@Req() request: Request, @Res() response: Response): Promise<void> {
-    await this.processRequest(request, response, 'products');
+    const cachedResponse = this.appService.getDataFromCache();
+    if (cachedResponse) {
+      console.log(`Products response from cache: ${JSON.stringify(cachedResponse)}`);
+      response.json(cachedResponse);
+      return;
+    }
+    let isCachable = request.method === 'GET';
+    await this.processRequest(request, response, 'products', isCachable);
   }
 
   @All('cart')
   async handleCartRequests(@Req() request: Request, @Res() response: Response): Promise<void> {
-    await this.processRequest(request, response, 'cart');
+    await this.processRequest(request, response, 'cart', false);
   }
 
-  async processRequest(request: Request, response: Response, targetService: string): Promise<void> {
+  async processRequest(request: Request, response: Response, targetService: string, isCachable: boolean): Promise<void> {
     console.log(`Request ${request.method} to ${request.originalUrl}`);
 
     const redirectUrl = this.configService.get(`${targetService.toUpperCase()}_SERVICE`);
@@ -40,6 +47,9 @@ export class AppController {
 
     try {
       const serviceResponse = await this.executeRequest(request, redirectUrl);
+      if (isCachable) {
+        this.appService.setCacheForData(serviceResponse.data);
+      }
       console.log(`Service response status code: [${serviceResponse.status}]`);
       response.status(serviceResponse.status).json(serviceResponse.data);
     } catch (e) {
