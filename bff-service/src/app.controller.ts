@@ -34,6 +34,12 @@ export class AppController {
     await this.processRequest(request, response, 'cart', false);
   }
 
+  @All(['/:recipient', '/:recipient/:id'])
+  handleRestRequests(@Req() request: Request): void {
+    console.warn(`Service request not supported: ${request.originalUrl}`);
+    throw new BadGatewayException('Cannot process request');
+  }
+
   async processRequest(request: Request, response: Response, targetService: string, isCachable: boolean): Promise<void> {
     console.log(`Request ${request.method} to ${request.originalUrl}`);
 
