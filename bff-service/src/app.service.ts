@@ -6,10 +6,6 @@ export class AppService {
 
   constructor(private readonly productsCache: ProductsCache) {}
 
-  getHello(): string {
-    return 'Hello World!';
-  }
-
   getDataFromCache() {
     return this.productsCache.products;
   }

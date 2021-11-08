@@ -12,11 +12,6 @@ export class AppController {
       private readonly configService: ConfigService
   ) {}
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
-  }
-
   @All('products')
   async processProductRequests(@Req() request: Request, @Res() response: Response): Promise<void> {
     let isCachable = request.method === 'GET';
