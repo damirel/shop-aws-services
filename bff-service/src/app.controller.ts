@@ -12,6 +12,11 @@ export class AppController {
       private readonly configService: ConfigService
   ) {}
 
+  @All()
+  handleRestRequestsRoot(@Req() request: Request): void {
+    this.handleErrorRequest(request);
+  }
+
   @All('products')
   async processProductRequests(@Req() request: Request, @Res() response: Response): Promise<void> {
     let isCachable = request.method === 'GET';
@@ -31,6 +36,10 @@ export class AppController {
 
   @All(['/:recipient', '/:recipient/:id'])
   handleRestRequests(@Req() request: Request): void {
+    this.handleErrorRequest(request);
+  }
+
+  private handleErrorRequest(request: Request) {
     console.warn(`Service request not supported: ${request.originalUrl}`);
     throw new BadGatewayException('Cannot process request');
   }
